@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Microservices with Docker, Flask, and React</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(./css/google-font-yanone-kaffeesatz.css);
+      @import url(./css/google-font-droid-serif-400-700-400-italic.css);
+      @import url(./css/google-font-ubuntu-mono-400-700-400-italic.css);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      td {
+        padding-left: 5px;
+        padding-right: 5px;
+      }
+      .remark-code { font-family: 'Ubuntu Mono'; }
+      .remark-inline-code {
+        font-family: 'Ubuntu Mono';
+        padding: 2px 4px;
+        font-size: 90%;
+        color: #c7254e;
+        background-color: #f9f2f4;
+        border-radius: 0;
+       }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+    </textarea>
+    <script src="./js/remark-latest.min.js"></script>
+	<!--
+	<script src="./js/MathJax/MathJax.js?config=TeX-AMS_HTML&delayStartupUntil=configured" type="text/javascript"></script>
+	-->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" type="text/javascript"></script>
+    <script>
+	const getQuery = key => {
+		return new URLSearchParams(window.location.search).get(key);
+	};
+	const loadText = url => {
+		return new Promise((resolve, reject) => {
+			const xhr = new XMLHttpRequest();
+			xhr.open('GET', url, true);
+			xhr.onload = () => {
+				if (xhr.readyState === xhr.DONE) {
+					if (xhr.status === 200) {
+						// console.log(xhr.response);
+						// console.log(xhr.responseText);
+						resolve(xhr.responseText);
+						return;
+					}
+				}
+				reject(xhr.response);
+			};
+			xhr.send(null);
+		});
+	};
+const dirname = path => {
+	const items = path.split('/');
+	return items.slice(0, items.length - 1).join('/');
+};
+const getMarkdownFilenameFromQuery = () => {
+	let filename = getQuery('file');
+	if (filename === undefined || filename === null) {
+		filename = 'README.md'
+	}
+	if (!filename.endsWith('.md')) {
+		filename = filename + '/README.md';
+	}
+	return filename;
+};
+const getSource = () => {
+	const filename = getMarkdownFilenameFromQuery();
+	const rootUrl = getRootUrl();
+	const fileUrl = rootUrl + '/' + filename;
+	let baseUrl = dirname(fileUrl);
+	return loadText(fileUrl).then(txt => [txt, baseUrl]);
+};
+const getUrlWithoutQuery = () => {
+	return window.location.protocol + '//' + window.location.host + '/' + window.location.pathname;
+};
+const getRootUrl = () => {
+	return dirname(dirname(getUrlWithoutQuery()));
+};
+const replaceRelativeLink = (match, link, prefix) => {
+	if (link.startsWith('http')) return match;
+	if (link.startsWith('render://')) {
+		const currentFilename = getMarkdownFilenameFromQuery();
+		const newFilename= link.slice(9);
+		let file = 'README.md';
+		if (newFilename.startsWith('/')) {
+			file = newFilename.slice(1);
+		} else {
+			file = dirname(currentFilename) + '/' + newFilename;
+		}
+		return match.replace(link, getRootUrl() + '/render/index.html?file=' + file);
+	} else {
+		return match.replace(link, prefix + '/' + link);
+	}
+};
+const correctRelativeHTMLLinks = (html, prefix) => {
+	const regexs = [
+		/href='([^']*)'/g,
+		/href="([^"]*)"/g,
+		/src='([^']*)'/g,
+		/src="([^"]*)"/g
+		];
+    for(let regex of regexs) {
+		html = html.replace(regex, (match, link) => replaceRelativeLink(match, link, prefix));
+    }
+    return html;
+};
+const correctRelativeMarkdownLinks = (md, prefix) => {
+	const regex = /]\(([^(]*)\)/g;
+	return md.replace(regex, (match, link) => replaceRelativeLink(match, link, prefix));
+};
+const correctRelativeLinks = (md, prefix) => {
+	md = correctRelativeHTMLLinks(md, prefix);
+	return correctRelativeMarkdownLinks(md, prefix);
+};
+getSource().then(([txt, prefix]) => {
+	const source = document.getElementById('source');
+	source.textContent = correctRelativeLinks(txt, prefix);
+	const slideshow = remark.create();
+	// Setup MathJax
+	MathJax.Hub.Config({
+		tex2jax: {
+			skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+		}
+	});
+	MathJax.Hub.Configured();
+});
+	</script>
+  </body>
+</html>
