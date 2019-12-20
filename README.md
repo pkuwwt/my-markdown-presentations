@@ -28,14 +28,14 @@ We can also use `file=flask/microservices-flask-docker/README.md` directly.
 
 ## Cross reference
 
-For cross reference between presentation, we can use syntax 
+For cross reference between presentation, we can use url syntax 
 
 ```markdown
-[title](render:/absolute/README.md)
+render:/absolute/README.md
 ```
 or
 ```markdown
-[title](render:./relative/README.md)
+render:./relative/README.md
 ```
 
 ---
