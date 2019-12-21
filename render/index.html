@@ -85,8 +85,8 @@ const getUrlWithoutQuery = () => {
 const getRootUrl = () => {
 	return dirname(dirname(getUrlWithoutQuery()));
 };
-const replaceRelativeLink = (match, link, prefix) => {
-	if (link.startsWith('http')) return match;
+
+const replaceCrossReferenceLink = (match, link, prefix) => {
 	if (link.startsWith('render://')) {
 		const currentFilename = getMarkdownFilenameFromQuery();
 		const newFilename= link.slice(9);
@@ -97,9 +97,19 @@ const replaceRelativeLink = (match, link, prefix) => {
 			file = dirname(currentFilename) + '/' + newFilename;
 		}
 		return match.replace(link, getRootUrl() + '/render/index.html?file=' + file);
-	} else {
-		return match.replace(link, prefix + '/' + link);
 	}
+	return match;
+};
+
+const replaceRelativeLink = (match, link, prefix) => {
+	if (link.startsWith('http://') || link.startsWith('https://')) {
+		return match;
+	}
+	if (link.startsWith('render://')) {
+		return replaceCrossReferenceLink(match, link, prefix);
+	}
+	match = match.replace(link, prefix + '/' + link);
+	return match;
 };
 const correctRelativeHTMLLinks = (html, prefix) => {
 	const regexs = [
@@ -117,14 +127,72 @@ const correctRelativeMarkdownLinks = (md, prefix) => {
 	const regex = /]\(([^(]*)\)/g;
 	return md.replace(regex, (match, link) => replaceRelativeLink(match, link, prefix));
 };
-const correctRelativeLinks = (md, prefix) => {
-	md = correctRelativeHTMLLinks(md, prefix);
-	return correctRelativeMarkdownLinks(md, prefix);
+const extractHref = html => {
+	const regexs = [
+		/^.*href='([^']*)'.*$/,
+		/^.*href="([^"]*)".*$/
+		];
+    for(let regex of regexs) {
+		html = html.replace(regex, (match, link) => link);
+    }
+    return html;
+};
+const extractSrc = html => {
+	const regexs = [
+		/^.*src='([^']*)'.*$/,
+		/^.*src="([^"]*)".*$/
+		];
+    for(let regex of regexs) {
+		html = html.replace(regex, (match, link) => link);
+    }
+    return html;
+};
+const correctCrossReferenceLink = (link, prefix) => {
+	if (link.startsWith('render://')) {
+		const currentFilename = getMarkdownFilenameFromQuery();
+		const newFilename= link.slice(9);
+		let file = 'README.md';
+		if (newFilename.startsWith('/')) {
+			file = newFilename.slice(1);
+		} else {
+			file = dirname(currentFilename) + '/' + newFilename;
+		}
+		return getRootUrl() + '/render/index.html?file=' + file;
+	}
+	return link;
+};
+const correctLink = (link, prefix) => {
+	if (link.startsWith('http://') || link.startsWith('https://')) {
+		return link;
+	}
+	if (link.startsWith('render://')) {
+		return correctCrossReferenceLink(link, prefix);
+	}
+	return prefix + '/' + link;
+};
+const correctLinksByClass = (className, prefix) => {
+	const divs = document.getElementsByClassName(className);
+	for(let div of divs) {
+		for (let a of div.querySelectorAll('a')) {
+			const href = extractHref(a.outerHTML);
+			console.log('href=', href);
+			a.href = correctLink(href, prefix);
+			console.log('href=', a.href);
+		}
+		for (let img of div.querySelectorAll('img')) {
+			const src = extractSrc(img.outerHTML);
+			console.log('src=', src);
+			img.src = correctLink(src, prefix);
+			console.log('src=', img.src);
+		}
+	}
 };
 getSource().then(([txt, prefix]) => {
 	const source = document.getElementById('source');
-	source.textContent = correctRelativeLinks(txt, prefix);
+	source.textContent = txt;
+	// TODO: it will try to get relative resources and get 404 ERROR
 	const slideshow = remark.create();
+	correctLinksByClass('remark-slides-area', prefix);
 	// Setup MathJax
 	MathJax.Hub.Config({
 		tex2jax: {
