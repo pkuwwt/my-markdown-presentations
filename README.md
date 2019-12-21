@@ -7,7 +7,7 @@
 
 This is a collection of all my presentations written in markdown, and they are rendered in [remark.js](https://remarkjs.com) and [MathJax](https://www.mathjax.org).
 
-The renderer is customized so that we can view all the presentations directly, and each presentation can has its own directory.
+The renderer is customized so that we can view all the presentations directly, and each presentation has its own directory.
 
 This collection can be used in a local server, like `http://127.0.0.1:9090/render/index.html?file=flask/microservices-flask-docker`, after starting a local server in root directory as
 
@@ -43,4 +43,5 @@ or
 ## Presentation list
 
   * [Microservices with flask](render://flask/microservices-flask-docker)
+  * [First steps with Python type system](render://python/first-steps-with-python-type-system)
 
