@@ -44,4 +44,6 @@ or
 
   * [Microservices with flask](render://flask/microservices-flask-docker)
   * [First steps with Python type system](render://python/first-steps-with-python-type-system)
+  * [How to Share Data with Docker Volume](render://docker/how-to-share-data-with-docker-volume)
+  * [Conceptual Mathematics: A First Introduction to Categories](render://category/conceptual-mathematics-a-first-introduction-to-categories)
 
