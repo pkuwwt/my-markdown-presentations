@@ -37,6 +37,12 @@ def try_port(port):
         return get_open_port()
     return port
 
+def try_ports(ports):
+    for port in ports:
+        if not is_port_in_use(port):
+            return port
+    return get_open_port()
+
 def is_presentation(path):
     path = join(root, path)
     if isfile(path) and path.endswith('.md'):
@@ -62,7 +68,7 @@ def serve(port):
     TCPServer(("", int(port)), Redirect).serve_forever()
 
 def serve_with_open_port():
-    port = try_port(default_port)
+    port = try_ports(range(default_port, default_port + 20))
     serve(port)
 
 def main():
