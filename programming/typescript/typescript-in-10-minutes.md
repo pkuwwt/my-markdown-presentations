@@ -250,8 +250,60 @@ console.log(asim.course()); //output: Angular
 
 ---
 
+## Generics
+
+  * Generics are templates that allow the same function to accept arguments of various different types
+  * Creating reusable components using generics is better than `any` data type, as generics preserve the types of the variables.
+
+```typescript
+function genericFunc<T>(argument: T): T[] {
+    var arrayOfT: T[] = [];    // Create empty array of type T.
+    arrayOfT.push(argument);   // Push, now arrayOfT = [argument].
+    return arrayOfT;
+}
+
+var arrayFromString = genericFunc<string>("beep");
+console.log(arrayFromString[0]);         // "beep"
+console.log(typeof arrayFromString[0])   // String
+
+var arrayFromNumber = genericFunc(42);
+console.log(arrayFromNumber[0]);         // 42
+console.log(typeof arrayFromNumber[0])   // number
+```
+
+  * Other generics examples can be found [here](https://www.typescriptlang.org/docs/handbook/generics.html).
+
+---
+
+## Modules
+
+  * Modularity is important for large applications.
+  * Spliting code into small and reusable components makes the projects organized and understandable.
+  * TypeScript has a syntax for importing and exporting modules, but cannot handle the actual wiring between files.
+  * To enable external modules, we need 3rd-party libraries like [require.js](http://requirejs.org/) for browser and [CommonJS](https://en.wikipedia.org/wiki/CommonJS) for Node.js
+
+  * Following are the two sample code files: `exporter.ts`, `importer.ts`
+
+```typescript
+// exporter.ts
+var sayHi = function(): void {
+    console.log("Hello!");
+}
+export = sayHi;
+
+// importer.ts
+import sayHi = require('./exporter');
+sayHi();
+```
+  * For `require.js`, we should compile the modules by `tsc --module amd *.ts`
+  * More information refer to [TypeScript modules](https://www.typescriptlang.org/docs/handbook/modules.html) and [require.js usage](http://requirejs.org/docs/start.html)
+
+---
+
+
 ## References
 
   * [TypeScript in 10 minutes: A quick introduction to typescript and its usage](https://www.agiliq.com/blog/2019/07/typescript-in-10-minutes/)
+  * [Learn TypeScript in 30 minutes](https://tutorialzine.com/2016/07/learn-typescript-in-30-minutes)
   * [TypeScript Documentation](https://www.typescriptlang.org/docs/home.html)
 
