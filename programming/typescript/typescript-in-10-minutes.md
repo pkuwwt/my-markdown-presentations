@@ -210,12 +210,11 @@ class Clock implements ClockInterface {
 // function using an interface
 interface LabeledValue {
   label: string;
+  optional?: string;
 }
-
 function printLabel(labeledObj: LabeledValue) {
     console.log(labeledObj.label);
 }
-
 let myObj = {size: 10, label: "Size 10 Object"};
 printLabel(myObj);
 ```
@@ -300,10 +299,42 @@ sayHi();
 
 ---
 
+## Safe navigation operator `?.` and `.?`
+
+  * Since TypeScript 3.7
+  * Access property: `foo?.bar` equivalent to 
+
+```javascript
+(foo == null || foo == undefined) ? undefined : foo.bar
+```
+
+  * Optional call: 
+
+```typescript
+function (otherFn: (par: string) -> void) {
+	otherFn.?('some value');
+}
+```
+
+---
+
+## Non-null assertion operator `!.`
+
+````javascript
+function validateEntity(e: Entity) {
+}
+function processEntity(e: Entity) {
+	validateEntity(e);
+	let s = e!.name; // Assert that e is non-null
+}
+```
+
+---
 
 ## References
 
   * [TypeScript in 10 minutes: A quick introduction to typescript and its usage](https://www.agiliq.com/blog/2019/07/typescript-in-10-minutes/)
   * [Learn TypeScript in 30 minutes](https://tutorialzine.com/2016/07/learn-typescript-in-30-minutes)
   * [TypeScript Documentation](https://www.typescriptlang.org/docs/home.html)
+  * [TypeScript 2.0](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-0.html)
 
